@@ -16,6 +16,7 @@ parselineFuncs.o: parselineFuncs.c
 
 test:
 	./test.sh
+	
 clean:
 	make all
 	rm -f *.o *.gch

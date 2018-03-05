@@ -4,9 +4,6 @@ Brian Ishii (blishii)
 Assignemnt 4: mytar
 =================================================
 Files needed:
-mytar.c
-mytar.h
-tarFuncs.c
 Makefile
 
 =================================================
@@ -18,7 +15,6 @@ How to compile(need make file):
 make
 =================================================
 How to run:
-mytar [ctxvS]f tarfile [ path [ ... ] ]
 =================================================
 Notes:
 Teamwork makes the dream work and the mytar work.
