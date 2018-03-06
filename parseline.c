@@ -55,11 +55,18 @@ int main(int argc, char *argv[])
         i++;
     }
 
+    if (i > CMD_PIPE_MAX) {
+        fprintf(stderr, "pipeline too deep\n");
+        exit(EXIT_FAILURE);
+    }
+
+    //for testing
     for(j=0; j < i; j++) {
         printf("%s\n", lines[j]);
     }
 
     parseCommands(i, lines, commands);
 
+    //need to free lines
     return 0;
 }
