@@ -24,7 +24,11 @@ void deliminateByWhitespace(char *str, char *new[])
     {
         while(*ptr == ' ' || *ptr == '\t')
         {
-        ptr++;
+            ptr++;
+        }
+        if(*ptr == '\0' || *ptr == '\n')
+        {
+            break;
         }
         i = 0;
         while(ptr[i] != ' ' && ptr[i] != '\t')
@@ -44,15 +48,52 @@ void deliminateByWhitespace(char *str, char *new[])
 }
 
 /* gonna take a list of strings and turn them into a single command object */
-Command *parseRegularCommand(char *argv[])
+Command *parseRegularCommand(char *argv[], int stageNum, int totalCmds)
 {
-    Command *command;
-    command = NULL;
+    Command *command = (Command *) calloc(1, sizeof(Command));
+    char c;
+    char *ptr;
+    int i = 0;
+    char **cmdArgv = calloc(CMD_ARGS_MAX, sizeof(char *));
+
+    if(stageNum)
+    {
+        ptr = (char *) calloc(10, sizeof(char));
+        ptr = strcpy(ptr, "Stage ");
+        c = '0' + stageNum - 1;
+        ptr = strcat(ptr, &c);
+        command->input = ptr;
+    }
+    else
+    {
+        command->input = "stdin";
+    }
+
+    if(stageNum == totalCmds - 1)
+    {
+        command->output = "stdout";
+    }
+    else
+    {
+        ptr = (char *) calloc(10, sizeof(char));
+        ptr = strcpy(ptr, "Stage ");
+        c = '0' + stageNum + 1;
+        ptr = strcat(ptr, &c);
+        command->output = ptr;
+    }
+    while(argv[i] != NULL)
+    {
+        cmdArgv[i] = calloc(20, sizeof(char));
+        strcpy(cmdArgv[i], argv[i]);
+        i++;
+    }
+    command->argc = i;
+    command->argv = cmdArgv;
     return command;
 }
 
 /* ^^ what he said */
-Command *parseRedirectCommand(char *argv[])
+Command *parseRedirectCommand(char *argv[], int stageNum, int totalCmds)
 {  
     Command *command;
     command = NULL;
@@ -68,9 +109,9 @@ void parseCommands(int numCommands, char *line[], Command *commands[])
 
     j = 0;
     /* initialize argv */
-    while(i < numCommands)
+    for(; j < numCommands; j++)
     {
-        deliminateByWhitespace(line[i], argv);
+        deliminateByWhitespace(line[j], argv);
         i = 0;
    
         /* checks for redirects */
@@ -78,7 +119,7 @@ void parseCommands(int numCommands, char *line[], Command *commands[])
         {
             if(*argv[i] == '>' || *argv[i] == '<')
             {
-                commands[j] = parseRedirectCommand(argv);
+                commands[j] = parseRedirectCommand(argv, i, numCommands);
             }
             else
             {
@@ -90,7 +131,8 @@ void parseCommands(int numCommands, char *line[], Command *commands[])
          * no redirect symbols */
         if(argv[i] == NULL)
         {
-            commands[j] = parseRegularCommand(argv);
+            commands[j] = parseRegularCommand(argv, j, numCommands);
+            strcpy(commands[j]->commandline, line[j]);
         } 
         
         i = 0;
@@ -104,14 +146,20 @@ void parseCommands(int numCommands, char *line[], Command *commands[])
 
 void printCommand(int stageNum, Command *command)
 {
+    int i = 0;
     printf("---------\n");
     printf("Stage %d: \"%s\"\n", stageNum, command->commandline);
     printf("---------\n");
     /* TBD */
-    printf("      input: \n");
-    printf("     output: \n");
-    printf("       argc: \n");
-    printf("       argv: \n");
+    printf("      input: %s\n", command->input);
+    printf("     output: %s\n", command->output);
+    printf("       argc: %d\n", command->argc);
+    printf("       argv: ");
+    for(; i < command->argc - 1; i++)
+    {
+        printf("\"%s\", ", command->argv[i]);
+    }
+    printf("\"%s\"\n", command->argv[i]);
 }
 
 void initializeBuffer(char *ptr, int size)

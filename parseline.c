@@ -10,14 +10,23 @@
 
 int main(int argc, char *argv[])
 {
-    int i, n, len;
+    int i, j, n, len;
     char line[CMD_LINE_MAX];
     char temp[CMD_LINE_MAX];
+    char *cmdlines[CMD_PIPE_MAX + 1];
+    Command *commands[CMD_PIPE_MAX + 1];
     char *startptr, *endptr;
     //Command *command;
 
+    for(i = 0; i < CMD_PIPE_MAX + 1; i++)
+    {
+        commands[i] = NULL;
+    }
+
     startptr = line;
 
+    //initializeBuffer(commands, CMD_PIPE_MAX + 1);
+    //initializeBuffer(cmdlines, CMD_PIPE_MAX + 1);
     initializeBuffer(line, CMD_LINE_MAX);
     initializeBuffer(temp, CMD_LINE_MAX);
     
@@ -37,24 +46,33 @@ int main(int argc, char *argv[])
 
     len = strlen(line);
     i = 0;
-
+    j = 0;
     while(1) {
         endptr = strchr(startptr, '|');
         if (endptr != NULL) {
-            strncpy(temp, startptr, endptr - startptr); 
+            cmdlines[j] = (char *) calloc(endptr - startptr + 1, sizeof(char));
+            strncpy(cmdlines[j++], startptr, endptr - startptr); 
         } else {
             endptr = &line[len-1];
-            strncpy(temp, startptr, endptr - startptr); 
-            printf("%s\n", temp);
+            cmdlines[j] = (char *) calloc(endptr - startptr + 1, sizeof(char)); 
+            strncpy(cmdlines[j++], startptr, endptr - startptr); 
             //command = parseCommand(temp);
             //printCommand(i, command);
             break;
         }
-        printf("%s\n", temp);
         //command = parseCommand(temp);
         //printCommand(i, command);
         initializeBuffer(temp, CMD_LINE_MAX);
         startptr = endptr + 1;
+        i++;
+    }
+    /* cmdlines is now populated */
+
+    parseCommands(j, cmdlines, commands);
+    i = 0;
+    while(commands[i] != NULL)
+    {
+        printCommand(i, commands[i]);
         i++;
     }
 

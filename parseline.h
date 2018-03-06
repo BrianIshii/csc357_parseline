@@ -23,16 +23,16 @@ struct command {
     char *input;
     char *output;
     int argc;
-    char *argv[CMD_ARGS_MAX];
+    char **argv;
 };
 
 /* reads in a series of commands separated by pipes
  * and populates the array of command strings */
 void parseCommands(int numCommands, char *line[], Command *commands[]);
 
-Command *parseRegularCommand(char *argv[]);
+Command *parseRegularCommand(char *argv[], int, int);
 
-Command *parseRedirectCommand(char *argv[]);
+Command *parseRedirectCommand(char *argv[], int, int);
 
 /* reads in a string, deliminates it by tabs and spaces,
  * and populates the array */
