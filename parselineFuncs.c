@@ -70,13 +70,12 @@ void parseCommands(int numCommands, char *line[], Command *commands[])
     /* initialize argv */
     while(j < numCommands)
     {
-        deliminateByWhitespace(line[i], argv);
         i = 0;
+        deliminateByWhitespace(line[i], argv);
    
         /* checks for redirects */
         while(argv[i] != NULL)
         {
-            printf("%s", argv[i]);
             if(*argv[i] == '>' || *argv[i] == '<')
             {
                 commands[j] = parseRedirectCommand(argv);
