@@ -19,7 +19,7 @@ struct command {
     char *output;
     int argc;
     char *argv[CMD_ARGS_MAX];
-}
+};
 
 /* reads in args and returns a command struct */
 Command *parseCommand(char *line);
