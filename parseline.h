@@ -34,6 +34,15 @@ Command *parseRegularCommand(char *argv[], int, int);
 
 Command *parseRedirectCommand(char *argv[], int, int);
 
+Command *singleRightRedirect(char **, int, int);
+
+Command *singleLeftRedirect(char **, int, int);
+
+Command *doubleRedirect(char **, int, int);
+
+
+
+
 /* reads in a string, deliminates it by tabs and spaces,
  * and populates the array */
 void deliminateByWhitespace(char *, char **);

@@ -92,11 +92,130 @@ Command *parseRegularCommand(char *argv[], int stageNum, int totalCmds)
     return command;
 }
 
+Command *singleLeftRedirect(char *argv[], int stageNum, int totalCmds)
+{
+    Command *command;
+    command = NULL;
+    return command;
+}
+
+Command *doubleRedirect(char *argv[], int stageNum, int totalCmds)
+{
+    Command *command;
+    command = NULL;
+    return command;
+}
+
+Command *singleRightRedirect(char *argv[], int stageNum, int totalCmds)
+{
+    Command *command = (Command *) calloc(1, sizeof(Command));
+    int i, j, cmdLength;
+    char c;
+    char **cmdArgv = calloc(CMD_ARGS_MAX, sizeof(char *));
+
+    i = 0;
+    j = 0;
+    while(argv[i] != NULL)
+    {
+        if(!strcmp(argv[i], ">"))
+        {
+            command->output = (char *) calloc(20, sizeof(char));
+            strcpy(command->output, argv[i + 1]);
+            i += 2;
+        }
+        else
+        {
+            cmdArgv[j] = calloc(20, sizeof(char));
+            strcpy(cmdArgv[j], argv[i]);
+            i++;
+            j++;
+        }
+    }
+    cmdLength = i;
+    command->argc = i - 2;
+    command->argv = cmdArgv;
+    
+    if(!strcmp(argv[0], ">"))
+    {   /* first arg is the redirect */
+        fprintf(stderr, "that makes no sense\n");
+    }
+    if(!strcmp(argv[cmdLength - 1], ">"))
+    {   /* last arg is the redirect */
+        fprintf(stderr, "how though?\n");
+    }
+    if(stageNum != totalCmds - 1)
+    {   /* if not the last stage, redirect doesn't work */
+        fprintf(stderr, "ambiguous output\n");
+    }
+    if(!stageNum)
+    {   /* if first stage, input comes from stdin */
+        command->input = "stdin";
+    }
+    else
+    { /* otherwise, input comes from prior stage */
+        command->input = (char *) calloc(20, sizeof(char));
+        c = '0' + stageNum - 1;
+        strcpy(command->input, "Stage ");
+        strcat(command->input, &c);
+    }
+
+    return command;
+
+}
+
 /* ^^ what he said */
 Command *parseRedirectCommand(char *argv[], int stageNum, int totalCmds)
 {  
     Command *command;
-    command = NULL;
+    int i = 0;
+    int numLeft, numRight;
+    numLeft = 0;
+    numRight = 0;
+    while(argv[i] != NULL)
+    {
+        if(!strcmp(argv[i], ">"))
+        {
+            numRight++;
+        }
+        else if(!strcmp(argv[i], "<"))
+        {
+            numLeft++;
+        }
+        i++;
+    }
+    if(!numLeft)
+    {
+        if(numRight == 1)
+        {
+            command = singleRightRedirect(argv, stageNum, totalCmds);
+        }
+        else
+        {
+            fprintf(stderr, "bad IO redirection\n");
+        }
+    }
+    else
+    {
+        if(numLeft == 1)
+        {
+            if(numRight == 1)
+            {
+                command = doubleRedirect(argv, stageNum, totalCmds);
+            }
+            else if(numRight == 0)
+            {
+                command = singleLeftRedirect(argv, stageNum, totalCmds);
+            }
+            else
+            {
+                fprintf(stderr, "bad IO redirection\n");
+            }
+        }
+        else
+        {
+            fprintf(stderr, "bad IO redirection\n");
+        }
+    }
     return command;
 }
 
@@ -119,7 +238,10 @@ void parseCommands(int numCommands, char *line[], Command *commands[])
         {
             if(*argv[i] == '>' || *argv[i] == '<')
             {
-                commands[j] = parseRedirectCommand(argv, i, numCommands);
+                commands[j] = parseRedirectCommand(argv, j, numCommands);
+                initializeBuffer(commands[j]->commandline, CMD_LINE_MAX);
+                strcpy(commands[j]->commandline, line[j]);
+                break;
             }
             else
             {
