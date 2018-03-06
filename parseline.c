@@ -12,14 +12,13 @@ int main(int argc, char *argv[])
 {
     int i, n, len;
     char line[CMD_LINE_MAX];
-    char temp[CMD_LINE_MAX];
     char *startptr, *endptr;
-    //Command *command;
+    char *lines[CMD_PIPE_MAX];
+    Command *commands[CMD_PIPE_MAX];
 
     startptr = line;
 
     initializeBuffer(line, CMD_LINE_MAX);
-    initializeBuffer(temp, CMD_LINE_MAX);
     
     printf("line: ");
 
@@ -41,22 +40,23 @@ int main(int argc, char *argv[])
     while(1) {
         endptr = strchr(startptr, '|');
         if (endptr != NULL) {
-            strncpy(temp, startptr, endptr - startptr); 
+            lines[i] = calloc(endptr - startptr, sizeof(char));
+            strncpy(lines[i], startptr, endptr - startptr); 
         } else {
             endptr = &line[len-1];
-            strncpy(temp, startptr, endptr - startptr); 
-            printf("%s\n", temp);
-            //command = parseCommand(temp);
-            //printCommand(i, command);
+            lines[i] = calloc(endptr - startptr, sizeof(char));
+            strncpy(lines[i], startptr, endptr - startptr); 
+            printf("%s\n", lines[i]);
             break;
         }
-        printf("%s\n", temp);
-        //command = parseCommand(temp);
-        //printCommand(i, command);
-        initializeBuffer(temp, CMD_LINE_MAX);
+        printf("%s\n", lines[i]);
         startptr = endptr + 1;
         i++;
     }
+
+    printf("%d", i);
+    fflush(stdout);
+    parseCommands(i, lines, commands);
 
     return 0;
 }
