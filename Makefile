@@ -18,5 +18,6 @@ test:
 	./test.sh
 	
 clean:
-	make all
-	rm -f *.o *.gch
+	make 
+	rm parseline.o
+	rm parselineFuncs.o

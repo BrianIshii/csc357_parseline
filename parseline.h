@@ -6,6 +6,7 @@
 
 
 #include<stdio.h>
+#include<string.h>
 
 #define CMD_LINE_MAX 1024
 #define CMD_PIPE_MAX 20
@@ -27,5 +28,4 @@ Command *parseCommand(char *line);
 /* print commands */
 void printCommand(int stageNum, Command *command);
 
-/* initialize struct command */
-void initializeCommand(Command *command);
+void initializeBuffer(char *ptr, int size);
