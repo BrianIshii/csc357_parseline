@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     char line[CMD_LINE_MAX];
     char temp[CMD_LINE_MAX];
     char *startptr, *endptr;
-    Command *command;
+    //Command *command;
 
     startptr = line;
 
@@ -45,17 +45,18 @@ int main(int argc, char *argv[])
         } else {
             endptr = &line[len-1];
             strncpy(temp, startptr, endptr - startptr); 
-            printf("%s", temp);
+            printf("%s\n", temp);
+            //command = parseCommand(temp);
+            //printCommand(i, command);
             break;
         }
-        printf("%s", temp);
-        command = parseCommand(temp);
-        printCommand(i, command);
+        printf("%s\n", temp);
+        //command = parseCommand(temp);
+        //printCommand(i, command);
         initializeBuffer(temp, CMD_LINE_MAX);
         startptr = endptr + 1;
         i++;
     }
-    printf("\n%s\n", line);
 
     return 0;
 }

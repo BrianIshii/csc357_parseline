@@ -46,13 +46,17 @@ void deliminateByWhitespace(char *str, char *new[])
 /* gonna take a list of strings and turn them into a single command object */
 Command *parseRegularCommand(char *argv[])
 {
-    ;
+    Command *command;
+    command = NULL;
+    return command;
 }
 
 /* ^^ what he said */
 Command *parseRedirectCommand(char *argv[])
 {  
-    ;   
+    Command *command;
+    command = NULL;
+    return command;
 }
 
 /* reads a series of strings (that were once separated by pipes) and
@@ -98,11 +102,20 @@ void parseCommands(int numCommands, char *line[], Command *commands[])
     }
 }
 
-void printCommand(int stageNum, Command *command) {
-    printf("stage num : %d", stageNum); /* temp line remove later*/
+void printCommand(int stageNum, Command *command)
+{
+    printf("---------\n");
+    printf("Stage %d: \"%s\"\n", stageNum, command->commandline);
+    printf("---------\n");
+    /* TBD */
+    printf("      input: \n");
+    printf("     output: \n");
+    printf("       argc: \n");
+    printf("       argv: \n");
 }
 
-void initializeBuffer(char *ptr, int size) {
+void initializeBuffer(char *ptr, int size)
+{
     int i;
 
     for(i=0; i < size; i++) {
