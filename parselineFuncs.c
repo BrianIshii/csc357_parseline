@@ -7,6 +7,7 @@
 
 #include "parseline.h"
 
+/* does what it looks like */
 void deliminateByWhitespace(char *str, char *new[])
 {
     int i, j;
@@ -42,17 +43,20 @@ void deliminateByWhitespace(char *str, char *new[])
     return;
 }
 
-
+/* gonna take a list of strings and turn them into a single command object */
 Command *parseRegularCommand(char *argv[])
 {
     ;
 }
 
+/* ^^ what he said */
 Command *parseRedirectCommand(char *argv[])
 {  
     ;   
 }
 
+/* reads a series of strings (that were once separated by pipes) and
+ * populates the commands array with Command structures */
 void parseCommands(int numCommands, char *line[], Command *commands[])
 {
     int i, j;
