@@ -10,7 +10,7 @@
 
 int main(int argc, char *argv[])
 {
-    int i, n, len;
+    int i, n, j, len;
     char line[CMD_LINE_MAX];
     char *startptr, *endptr;
     char *lines[CMD_PIPE_MAX];
@@ -34,28 +34,31 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    len = strlen(line);
     i = 0;
 
     while(1) {
         endptr = strchr(startptr, '|');
         if (endptr != NULL) {
-            lines[i] = calloc(endptr - startptr, sizeof(char));
-            strncpy(lines[i], startptr, endptr - startptr); 
+            len = endptr - startptr;
+            lines[i] = calloc(len + 1, sizeof(char));
+            strncpy(lines[i], startptr, len); 
         } else {
-            endptr = &line[len-1];
-            lines[i] = calloc(endptr - startptr, sizeof(char));
-            strncpy(lines[i], startptr, endptr - startptr); 
-            printf("%s\n", lines[i]);
+            endptr = &line[strlen(line)-1];
+            len = endptr - startptr;
+            lines[len] = 0;
+            lines[i] = calloc(len + 1, sizeof(char));
+            strncpy(lines[i], startptr, len); 
+            i++;
             break;
         }
-        printf("%s\n", lines[i]);
         startptr = endptr + 1;
         i++;
     }
 
-    printf("%d", i);
-    fflush(stdout);
+    for(j=0; j < i; j++) {
+        printf("%s\n", lines[j]);
+    }
+
     parseCommands(i, lines, commands);
 
     return 0;
