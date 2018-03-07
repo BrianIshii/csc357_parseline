@@ -79,7 +79,9 @@ Command *singleLeftRedirect(char *argv[], int stageNum, int totalCmds)
 {
     Command *command;
     int i, j, cmdLength;
-    char **cmdArgv = calloc(CMD_ARGS_MAX, sizeof(char *));
+    char **cmdArgv;
+
+    cmdArgv = calloc(CMD_ARGS_MAX, sizeof(char *));
     command = (Command *) calloc(1, sizeof(Command));
 
     i = 0;
@@ -98,7 +100,7 @@ Command *singleLeftRedirect(char *argv[], int stageNum, int totalCmds)
     }
 
     if(stageNum)
-    {   /* if not the last stage, redirect doesn't work */
+    {   /* if not the first stage, redirect doesn't work */
         fprintf(stderr, "%s: ambiguous input\n", argv[0]);
         exit(EXIT_FAILURE);
     }
@@ -113,7 +115,7 @@ Command *singleLeftRedirect(char *argv[], int stageNum, int totalCmds)
         }
         else
         {
-            cmdArgv[j] = calloc(sizeof(argv[i]), sizeof(char));
+            cmdArgv[j] = calloc(sizeof(argv[i]) + 1, sizeof(char));
             strcpy(cmdArgv[j], argv[i]);
             i++;
             j++;
@@ -194,8 +196,63 @@ char *getInput(int stageNum, int totalCmds)
 Command *doubleRedirect(char *argv[], int stageNum, int totalCmds)
 {
     Command *command;
+    int i, j, cmdLength;
+    char **cmdArgv;
 
+    cmdArgv = calloc(CMD_ARGS_MAX, sizeof(char *));
     command = (Command *) calloc(1, sizeof(Command));
+
+    i = 0;
+    j = 0;
+    cmdLength = 0;
+
+    /* count num of args */
+    while (argv[cmdLength] != NULL)
+    {
+        cmdLength++;
+    }
+
+    if(!strcmp(argv[cmdLength - 1], "<") || !strcmp(argv[0], ">"))
+    {   /* checks both redirects */
+        errorBadRedirection("input", argv[0]);
+    }
+
+    if(stageNum || totalCmds > 1)
+    {   /* if not the first stage and last stage */
+        fprintf(stderr, "%s: ambiguous input\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    while(argv[i] != NULL)
+    {
+        if(!strcmp(argv[i], "<"))
+        {
+            command->input = calloc(sizeof(argv[i + 1]) + 1, sizeof(char));
+            strcpy(command->input, argv[i + 1]);
+            i += 2;
+        }
+        else if(!strcmp(argv[i], ">"))
+        {
+            command->output = calloc(sizeof(argv[i + 1]) + 1, sizeof(char));
+            strcpy(command->output, argv[i + 1]);
+            i += 2;
+        }
+        else
+        {
+            cmdArgv[j] = calloc(sizeof(argv[i]) + 1, sizeof(char));
+            strcpy(cmdArgv[j], argv[i]);
+            i++;
+            j++;
+        }
+    }
+
+    if (cmdArgv[0] == NULL)
+    {
+        errorNullCommand();
+    }
+
+    command->argc = cmdLength - 4;
+    command->argv = cmdArgv;
 
     return command;
 }
@@ -204,7 +261,6 @@ Command *singleRightRedirect(char *argv[], int stageNum, int totalCmds)
 {
     Command *command = (Command *) calloc(1, sizeof(Command));
     int i, j, cmdLength;
-    char c;
     char **cmdArgv = calloc(CMD_ARGS_MAX, sizeof(char *));
 
     i = 0;
@@ -213,13 +269,14 @@ Command *singleRightRedirect(char *argv[], int stageNum, int totalCmds)
     {
         if(!strcmp(argv[i], ">"))
         {
-            command->output = (char *) calloc(20, sizeof(char));
+            command->output = (char *) 
+                calloc(sizeof(argv[i + 1]) + 1, sizeof(char));
             strcpy(command->output, argv[i + 1]);
             i += 2;
         }
         else
         {
-            cmdArgv[j] = calloc(20, sizeof(char));
+            cmdArgv[j] = calloc(sizeof(argv[i]) + 1, sizeof(char));
             strcpy(cmdArgv[j], argv[i]);
             i++;
             j++;
@@ -241,17 +298,8 @@ Command *singleRightRedirect(char *argv[], int stageNum, int totalCmds)
     {   /* if not the last stage, redirect doesn't work */
         fprintf(stderr, "ambiguous output\n");
     }
-    if(!stageNum)
-    {   /* if first stage, input comes from stdin */
-        command->input = "stdin";
-    }
-    else
-    { /* otherwise, input comes from prior stage */
-        command->input = (char *) calloc(20, sizeof(char));
-        c = '0' + stageNum - 1;
-        strcpy(command->input, "Stage ");
-        strcat(command->input, &c);
-    }
+
+    command->input = getInput(stageNum, totalCmds);
 
     return command;
 
