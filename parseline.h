@@ -40,7 +40,9 @@ Command *singleLeftRedirect(char **, int, int);
 
 Command *doubleRedirect(char **, int, int);
 
-
+/* functions to help create commands*/
+char *getInput(int stageNum, int totalCmds);
+char *getOutput(int stageNum, int totalCmds);
 
 
 /* reads in a string, deliminates it by tabs and spaces,
@@ -51,3 +53,7 @@ void deliminateByWhitespace(char *, char **);
 void printCommand(int stageNum, Command *command);
 
 void initializeBuffer(char *ptr, int size);
+
+/* error functions */
+void errorNullCommand();
+void errorBadRedirection(char *type, char *command);

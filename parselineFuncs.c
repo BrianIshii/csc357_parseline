@@ -95,14 +95,125 @@ Command *parseRegularCommand(char *argv[], int stageNum, int totalCmds)
 Command *singleLeftRedirect(char *argv[], int stageNum, int totalCmds)
 {
     Command *command;
-    command = NULL;
+    int i, j, cmdLength;
+    char **cmdArgv = calloc(CMD_ARGS_MAX, sizeof(char *));
+    command = (Command *) calloc(1, sizeof(Command));
+
+    i = 0;
+    j = 0;
+    cmdLength = 0;
+
+    /* count num of args */
+    while (argv[cmdLength] != NULL)
+    {
+        cmdLength++;
+    }
+
+    if(!strcmp(argv[cmdLength - 1], "<"))
+    {   /* last arg is the redirect */
+        errorBadRedirection("input", argv[0]);
+    }
+
+    if(stageNum)
+    {   /* if not the last stage, redirect doesn't work */
+        fprintf(stderr, "%s: ambiguous input\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    while(argv[i] != NULL)
+    {
+        if(!strcmp(argv[i], "<"))
+        {
+            command->input = calloc(sizeof(argv[i + 1]) + 1, sizeof(char));
+            strcpy(command->input, argv[i + 1]);
+            i += 2;
+        }
+        else
+        {
+            cmdArgv[j] = calloc(sizeof(argv[i]), sizeof(char));
+            strcpy(cmdArgv[j], argv[i]);
+            i++;
+            j++;
+        }
+    }
+
+    if (cmdArgv[0] == NULL)
+    {
+        errorNullCommand();
+    }
+
+    command->argc = cmdLength - 2;
+    command->argv = cmdArgv;
+
+    command->output = getOutput(stageNum, totalCmds);
+
     return command;
+}
+
+char *getOutput(int stageNum, int totalCmds)
+{
+    char *output = NULL;
+    char *stdoutput = "original stdout";
+    char *pipeout = "pipe to stage ";
+    char stage;
+
+    if(stageNum + 1 == totalCmds)
+    {
+        output = (char *) calloc(sizeof(stdoutput), sizeof(char));
+        strcpy(output, stdoutput);
+    }
+    else
+    {
+        stage = '0' + stageNum + 1;
+        output = (char *) calloc(sizeof(pipeout) + 2, sizeof(char));
+        strcpy(output, pipeout);
+        strncat(output, &stage, 1);
+    }
+    
+    if (output == NULL)
+    {
+        perror("Could not calloc memory for output");
+        exit(EXIT_FAILURE);
+    }
+
+    return output;
+}
+
+char *getInput(int stageNum, int totalCmds)
+{
+    char *input = NULL;
+    char *stdinp = "original stdin";
+    char *pipeinp = "pipe from stage ";
+    char stage;
+
+    if(!stageNum)
+    {
+        input = (char *) calloc(sizeof(stdinp), sizeof(char));
+        strcpy(input, stdinp);
+    }
+    else
+    {
+        stage = '0' + stageNum - 1;
+        input = (char *) calloc(sizeof(pipeinp) + 2, sizeof(char));
+        strcpy(input, pipeinp);
+        strncat(input, &stage, 1);
+    }
+    
+    if (input == NULL)
+    {
+        perror("Could not calloc memory for input");
+        exit(EXIT_FAILURE);
+    }
+
+    return input;
 }
 
 Command *doubleRedirect(char *argv[], int stageNum, int totalCmds)
 {
     Command *command;
-    command = NULL;
+
+    command = (Command *) calloc(1, sizeof(Command));
+
     return command;
 }
 
@@ -233,6 +344,11 @@ void parseCommands(int numCommands, char *line[], Command *commands[])
         deliminateByWhitespace(line[j], argv);
         i = 0;
 
+        if(argv[i] == NULL) {
+            fprintf(stderr, "invalid null command\n");
+            exit(EXIT_FAILURE);
+        }
+        
         /* checks for redirects */
         while(argv[i] != NULL)
         {
@@ -291,4 +407,16 @@ void initializeBuffer(char *ptr, int size)
     for(i=0; i < size; i++) {
         ptr[i] = 0;
     }
+}
+
+void errorNullCommand()
+{
+    fprintf(stderr, "invalid null command\n");
+    exit(EXIT_FAILURE);
+}
+
+void errorBadRedirection(char *type, char *command)
+{
+    fprintf(stderr, "%s: bad %s redirection\n", command, type);
+    exit(EXIT_FAILURE);
 }
