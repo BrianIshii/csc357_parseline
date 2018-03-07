@@ -16,8 +16,7 @@ int main(int argc, char *argv[])
     char *cmdlines[CMD_PIPE_MAX + 1];
     Command *commands[CMD_PIPE_MAX + 1];
     char *startptr, *endptr;
-    //Command *command;
-
+    
     for(i = 0; i < CMD_PIPE_MAX + 1; i++)
     {
         commands[i] = NULL;
@@ -29,7 +28,7 @@ int main(int argc, char *argv[])
     //initializeBuffer(cmdlines, CMD_PIPE_MAX + 1);
     initializeBuffer(line, CMD_LINE_MAX);
     initializeBuffer(temp, CMD_LINE_MAX);
-    
+
     printf("line: ");
 
     fflush(stdout);
@@ -76,5 +75,11 @@ int main(int argc, char *argv[])
         i++;
     }
 
+    if (i > CMD_PIPE_MAX) {
+        fprintf(stderr, "pipeline too deep\n");
+        exit(EXIT_FAILURE);
+    }
+
+    //need to free lines
     return 0;
 }

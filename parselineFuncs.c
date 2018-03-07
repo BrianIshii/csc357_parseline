@@ -232,7 +232,7 @@ void parseCommands(int numCommands, char *line[], Command *commands[])
     {
         deliminateByWhitespace(line[j], argv);
         i = 0;
-   
+
         /* checks for redirects */
         while(argv[i] != NULL)
         {
