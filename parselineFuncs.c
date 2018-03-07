@@ -215,6 +215,7 @@ Command *doubleRedirect(char *argv[], int stageNum, int totalCmds)
     if(!strcmp(argv[cmdLength - 1], "<") || !strcmp(argv[0], ">"))
     {   /* checks both redirects */
         errorBadRedirection("input", argv[0]);
+        exit(MALFORMED_INPUT);
     }
 
     if(stageNum || totalCmds > 1)
@@ -227,12 +228,27 @@ Command *doubleRedirect(char *argv[], int stageNum, int totalCmds)
     {
         if(!strcmp(argv[i], "<"))
         {
+            if(argv[i+1] == NULL)
+            {
+                fprintf(stderr, "malformed redirect\n");
+                exit(MALFORMED_INPUT);
+            }
+            else if(!strcmp(argv[i + 1], ">"))
+            {
+                fprintf(stderr, "malformed INPUT redirect\n");
+                exit(MALFORMED_INPUT);
+            }
             command->input = calloc(sizeof(argv[i + 1]) + 1, sizeof(char));
             strcpy(command->input, argv[i + 1]);
             i += 2;
         }
         else if(!strcmp(argv[i], ">"))
         {
+            if(command->input == NULL)
+            {   /* < must come BEFORE > */
+                fprintf(stderr, "malformed redirect\n");
+                exit(MALFORMED_INPUT);
+            }
             command->output = calloc(sizeof(argv[i + 1]) + 1, sizeof(char));
             strcpy(command->output, argv[i + 1]);
             i += 2;
@@ -269,6 +285,11 @@ Command *singleRightRedirect(char *argv[], int stageNum, int totalCmds)
     {
         if(!strcmp(argv[i], ">"))
         {
+            if(argv[i+1] == NULL)
+            {
+                fprintf(stderr, "malformed redirect\n");
+                exit(MALFORMED_INPUT);
+            }
             command->output = (char *) 
                 calloc(sizeof(argv[i + 1]) + 1, sizeof(char));
             strcpy(command->output, argv[i + 1]);
@@ -289,14 +310,17 @@ Command *singleRightRedirect(char *argv[], int stageNum, int totalCmds)
     if(!strcmp(argv[0], ">"))
     {   /* first arg is the redirect */
         fprintf(stderr, "that makes no sense\n");
+        exit(MALFORMED_INPUT);
     }
     if(!strcmp(argv[cmdLength - 1], ">"))
     {   /* last arg is the redirect */
         fprintf(stderr, "how though?\n");
+        exit(MALFORMED_INPUT);
     }
     if(stageNum != totalCmds - 1)
     {   /* if not the last stage, redirect doesn't work */
         fprintf(stderr, "ambiguous output\n");
+        exit(MALFORMED_INPUT);
     }
 
     command->input = getInput(stageNum, totalCmds);
@@ -317,10 +341,20 @@ Command *parseRedirectCommand(char *argv[], int stageNum, int totalCmds)
     {
         if(!strcmp(argv[i], ">"))
         {
+            if(i == 0)
+            {
+                fprintf(stderr, "incorrect IN redirection\n");
+                exit(MALFORMED_INPUT);
+            }
             numRight++;
         }
         else if(!strcmp(argv[i], "<"))
         {
+            if(i == 0)
+            {
+                fprintf(stderr, "incorrect OUT redirection\n");
+                exit(MALFORMED_INPUT);
+            }
             numLeft++;
         }
         i++;
@@ -334,6 +368,7 @@ Command *parseRedirectCommand(char *argv[], int stageNum, int totalCmds)
         else
         {
             fprintf(stderr, "bad IO redirection\n");
+            exit(MALFORMED_INPUT);
         }
     }
     else
@@ -351,11 +386,13 @@ Command *parseRedirectCommand(char *argv[], int stageNum, int totalCmds)
             else
             {
                 fprintf(stderr, "bad IO redirection\n");
+                exit(MALFORMED_INPUT);
             }
         }
         else
         {
             fprintf(stderr, "bad IO redirection\n");
+            exit(MALFORMED_INPUT);
         }
     }
     return command;
