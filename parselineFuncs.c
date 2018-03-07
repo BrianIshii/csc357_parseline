@@ -51,44 +51,27 @@ void deliminateByWhitespace(char *str, char *new[])
 Command *parseRegularCommand(char *argv[], int stageNum, int totalCmds)
 {
     Command *command = (Command *) calloc(1, sizeof(Command));
-    char c;
-    char *ptr;
-    int i = 0;
     char **cmdArgv = calloc(CMD_ARGS_MAX, sizeof(char *));
+    int i = 0;
 
-    if(stageNum)
-    {
-        ptr = (char *) calloc(10, sizeof(char));
-        ptr = strcpy(ptr, "Stage ");
-        c = '0' + stageNum - 1;
-        ptr = strcat(ptr, &c);
-        command->input = ptr;
-    }
-    else
-    {
-        command->input = "stdin";
-    }
+    command->input = getInput(stageNum, totalCmds);
+    command->output = getOutput(stageNum, totalCmds);
 
-    if(stageNum == totalCmds - 1)
-    {
-        command->output = "stdout";
-    }
-    else
-    {
-        ptr = (char *) calloc(10, sizeof(char));
-        ptr = strcpy(ptr, "Stage ");
-        c = '0' + stageNum + 1;
-        ptr = strcat(ptr, &c);
-        command->output = ptr;
-    }
     while(argv[i] != NULL)
     {
         cmdArgv[i] = calloc(20, sizeof(char));
         strcpy(cmdArgv[i], argv[i]);
         i++;
     }
+
+    if (cmdArgv[0] == NULL)
+    {
+        errorNullCommand();
+    }
+
     command->argc = i;
     command->argv = cmdArgv;
+
     return command;
 }
 
@@ -385,9 +368,9 @@ void parseCommands(int numCommands, char *line[], Command *commands[])
 void printCommand(int stageNum, Command *command)
 {
     int i = 0;
-    printf("---------\n");
+    printf("--------\n");
     printf("Stage %d: \"%s\"\n", stageNum, command->commandline);
-    printf("---------\n");
+    printf("--------\n");
     /* TBD */
     printf("      input: %s\n", command->input);
     printf("     output: %s\n", command->output);
