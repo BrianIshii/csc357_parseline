@@ -49,6 +49,16 @@ int main(int argc, char *argv[])
     while(1) {
         endptr = strchr(startptr, '|');
         if (endptr != NULL) {
+            if(*(endptr-1) != ' ' && *(endptr-1) != '\t')
+            {   /* pipe is not surrounded by whitespace */
+                fprintf(stderr, "incorrect pipe placement\n");
+                exit(MALFORMED_INPUT);
+            }
+            if(*(endptr+1) != ' ' && *(endptr+1) != '\t')
+            {
+                fprintf(stderr, "incorrect pipe placement\n");
+                exit(MALFORMED_INPUT);
+            }
             cmdlines[j] = (char *) calloc(endptr - startptr + 1, sizeof(char));
             strncpy(cmdlines[j++], startptr, endptr - startptr); 
         } else {
